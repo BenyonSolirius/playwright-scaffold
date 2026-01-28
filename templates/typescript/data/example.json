@@ -1,0 +1,17 @@
+{
+  "users": {
+    "basic": {
+      "username": "john_user",
+      "password": "hunter12"
+    },
+    "admin": {
+      "username": "sarah_admin",
+      "password": "p4ssw0rd!"
+    }
+  },
+  "notes": [
+    "Avoid JSON when dealing with large amounts of data",
+    "If a lot of test data shares the same scheme, it's better to create",
+    "a TypeScript types file and have all tests data use that for consistency"
+  ]
+}

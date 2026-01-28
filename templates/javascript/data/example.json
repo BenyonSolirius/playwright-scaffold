@@ -1,0 +1,12 @@
+{
+  "users": {
+    "basic": {
+      "username": "john_user",
+      "password": "hunter12"
+    },
+    "admin": {
+      "username": "sarah_admin",
+      "password": "p4ssw0rd!"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+.yarn-integrity
+
+# Build output
+dist/
+build/
+out/
+
+# Playwright output
+test-results/
+playwright-report/
+blob-report/
+trace.zip
+trace/
+*.zip
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sw?
+*.sublime-project
+*.sublime-workspace
+
+# Coverage reports
+coverage/
+coverage-final.json
+lcov-report/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# TypeScript
+*.tsbuildinfo
