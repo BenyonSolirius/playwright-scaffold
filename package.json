@@ -37,5 +37,14 @@
     "node": ">=18"
   },
   "author": "Jordan Benyon",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenyonSolirius/playwright-scaffold.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BenyonSolirius/playwright-scaffold/issues"
+  },
+  "homepage": "https://github.com/BenyonSolirius/playwright-scaffold#readme"
 }
