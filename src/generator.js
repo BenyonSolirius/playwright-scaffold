@@ -86,6 +86,9 @@ export async function generateProject(config) {
   p.log.info(`Creating project at ${chalk.blue.underline(targetDir)}`);
 
   fs.cpSync(commonDir, targetDir, { recursive: true, errorOnExist: true });
+  fs.renameSync(path.join(targetDir, 'gitignore'), path.join(targetDir, '.gitignore'));
+  fs.renameSync(path.join(targetDir, 'env.local'), path.join(targetDir, '.env.local'));
+
   fs.cpSync(baseLanguageDir, targetDir, { recursive: true, errorOnExist: true });
   fs.cpSync(modelDir, targetDir, { recursive: true, errorOnExist: true });
 
