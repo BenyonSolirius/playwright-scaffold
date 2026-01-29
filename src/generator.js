@@ -63,6 +63,7 @@ export async function generateProject(config) {
   const model = config.model.split(' ')[0].toLowerCase();
   const tools = config.tools;
   const projectName = config.projectName;
+  const eslintConfig = config.eslintConfig ?? 'basic';
 
   const dependancies = [];
   const targetDir = path.resolve(process.cwd(), projectName);
@@ -79,7 +80,7 @@ export async function generateProject(config) {
   const prettierDir = path.resolve(__dirname, `../templates/prettier/${language}`);
   if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + prettierDir);
 
-  const eslintDir = path.resolve(__dirname, `../templates/eslint/${language}`);
+  const eslintDir = path.resolve(__dirname, `../templates/eslint/${language}/${eslintConfig}`);
   if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + eslintDir);
 
   p.log.info(`Creating project at ${chalk.blue.underline(targetDir)}`);

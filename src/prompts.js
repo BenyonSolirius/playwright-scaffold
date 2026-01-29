@@ -3,6 +3,8 @@ import chalk from 'chalk';
 import pkg from '../package.json' with { type: 'json' };
 import { existsSync } from 'node:fs';
 
+// Not the most beautiful code, but tried to avoid TS for this example.
+
 const withComment = (item, hint) => item + chalk.grey(` (${hint})`);
 
 function quitEarlyOnCancelled(value) {
@@ -16,37 +18,50 @@ export async function promptUser() {
   console.clear();
   p.intro(pkg.name);
 
-  //
-  const defaultName = 'playwright-tests';
   let projectName = await p.text({
     message: 'What is your project named?',
-    placeholder: defaultName,
+    placeholder: 'my-framework-name',
     validate: (v) => {
-      const folderPath = v?.trim();
-      const folderExists = folderPath ? existsSync(folderPath) : false;
-      return folderExists ? 'A directory with that name already exists.' : undefined;
+      if (!v?.trim().length) return 'A directory with that name already exists.';
+      // Must me alphanumeric, less than 50 characters, a minimum of 1.
+      if (!v?.match(/^[a-zA-Z0-9-]{1,50}$/)) return 'Invalid directory name, must be alphanumeric.';
     },
   });
   quitEarlyOnCancelled(projectName);
 
-  if (!projectName.trim().length) {
-    process.stdout.write('\x1b[1A');
-    process.stdout.write('\x1b[0J');
-    console.log(chalk.gray(p.S_BAR + '  ' + defaultName));
-    projectName = defaultName;
-  }
+  // Ask for confirmation if asked to use JavaScript
+  async function askLanguage() {
+    const language = await p.select({
+      message: 'Which language would you like to use?',
+      options: [
+        { value: 'typescript', label: 'TypeScript' },
+        { value: 'javascript', label: 'JavaScript' },
+      ],
+    });
+    quitEarlyOnCancelled(language);
 
-  //
-  const language = await p.select({
-    message: 'Which language would you like to use?',
-    options: [
-      { value: 'typescript', label: 'TypeScript' },
-      { value: 'javascript', label: 'JavaScript' },
-    ],
-  });
+    if (language !== 'typescript') {
+      const confirmed = await p.confirm({
+        message: "Are you sure? It's highly recommended that you use TypeScript for type saftey and linting",
+        initialValue: false,
+      });
+      quitEarlyOnCancelled(confirmed);
+
+      // TODO: Possibly make it add a MD file explaining the benefits to prettier/eslint
+      if (!confirmed) {
+        process.stdout.write('\x1b[6A');
+        process.stdout.write('\x1b[0J');
+        return await askLanguage();
+      }
+      return 'javascript'; // Booo :(
+    }
+
+    return language;
+  }
+  const language = await askLanguage();
   quitEarlyOnCancelled(language);
 
-  //
+  // This can be extended with more options in the future.
   const model = await p.select({
     message: 'Which action abstract layer to use?',
     options: [
@@ -65,7 +80,7 @@ export async function promptUser() {
   });
   quitEarlyOnCancelled(model);
 
-  //
+  // This question is skipped and the recommended is chosen if the previous tried to avoid eslint.
   let codeQualityUnsure = false;
   async function askTools() {
     const tools = await p.multiselect({
