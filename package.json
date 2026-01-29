@@ -1,10 +1,21 @@
 {
+  "type": "module",
   "name": "@solirius/playwright",
   "version": "1.0.0",
-  "type": "module",
+  "description": "CLI to scaffold a Playwright project",
+  "keywords": [
+    "create",
+    "playwright",
+    "cli",
+    "scaffold"
+  ],
+  "main": "bin/cli.js",
   "bin": {
-    "sol-scaff": "./bin/cli.js"
+    "playwright": "bin/cli.js"
   },
+  "files": [
+    "bin"
+  ],
   "scripts": {
     "format": "prettier . --write --log-level=silent"
   },
@@ -21,5 +32,10 @@
     "prettier": "^3.8.1",
     "typescript-eslint": "^8.54.0",
     "zod": "^4.3.6"
-  }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "Jordan Benyon",
+  "license": "MIT"
 }
