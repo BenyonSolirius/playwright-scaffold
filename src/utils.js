@@ -2,9 +2,9 @@ import { execa } from 'execa';
 
 export async function isCodeCmdAvailable() {
   try {
-    await execa('code', ['--version']);
-    return true; // command exists
+    const { code } = await execa('code', ['--version']);
+    return code === 0; // command exists and is available
   } catch (err) {
-    return false; // command not found
+    return false; // command not found or failed
   }
 }

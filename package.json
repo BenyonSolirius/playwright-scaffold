@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@solirius/create-playwright",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "CLI to scaffold a Playwright project",
   "keywords": [
     "create",
