@@ -42,7 +42,7 @@ export async function promptUser() {
 
     if (language !== 'typescript') {
       const confirmed = await p.confirm({
-        message: "Are you sure? It's highly recommended that you use TypeScript for type saftey and linting",
+        message: "Are you sure? It's highly recommended that you use TypeScript for type safety and linting",
         initialValue: false,
       });
       quitEarlyOnCancelled(confirmed);

@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@solirius/create-playwright",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "CLI to scaffold a Playwright project",
   "keywords": [
     "create",
@@ -11,10 +11,15 @@
   ],
   "main": "bin/cli.js",
   "bin": {
-    "playwright": "bin/cli.js"
+    "create-playwright": "bin/cli.js"
   },
   "files": [
-    "bin"
+    "bin",
+    "src",
+    "templates/**/*",
+    "templates/common/",
+    "templates/common/.env.local",
+    "templates/common/.gitignore"
   ],
   "scripts": {
     "format": "prettier . --write --log-level=silent"
