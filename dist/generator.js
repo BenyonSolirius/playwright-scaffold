@@ -7,7 +7,10 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { spinner } from '@clack/prompts';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const waitPromise = async (ms) => new Promise((res) => setTimeout(() => res(null), ms));
+const waitPromise = async (/** @type {number | undefined} */ ms) => new Promise((res) => setTimeout(() => res(null), ms));
+/**
+ * @param {string} targetDir
+ */
 function createNvmConfig(targetDir) {
     try {
         const nodeVersion = execSync('node -v', { encoding: 'utf8' }).trim();
@@ -15,10 +18,15 @@ function createNvmConfig(targetDir) {
         fs.writeFileSync(`${targetDir}/.nvmrc`, version + '\n', 'utf8');
     }
     catch (err) {
+        // @ts-ignore
         console.error('Error writing .nvmrc:', err.message);
         process.exit(1);
     }
 }
+/**
+ * @param {string[]} dependancies
+ * @param {string} targetDir
+ */
 export async function installDeps(dependancies, targetDir) {
     const sanitizedUrl = targetDir.replace(/\/$/, '');
     const segments = sanitizedUrl.split('/');
@@ -45,6 +53,9 @@ export async function installDeps(dependancies, targetDir) {
     await waitPromise(1500);
     sp.stop('Setup complete!');
 }
+/**
+ * @param {{ language: string; model: string; tools: any; projectName: any; eslintConfig: string; }} config
+ */
 export async function generateProject(config) {
     const language = config.language.toLowerCase();
     const model = config.model.split(' ')[0].toLowerCase();
