@@ -1,7 +1,7 @@
 import fs, { existsSync, writeFileSync } from 'node:fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 import { execa } from 'execa';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
