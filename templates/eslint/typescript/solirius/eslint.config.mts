@@ -17,9 +17,16 @@ export default defineConfig([
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
   {
-    ignores: ['**/*.mjs'],
+    ignores: ['**/*.mjs', 'eslint.config.mts'],
   },
   {
+    files: ['eslint.config.mts'],
+    languageOptions: { parser: tseslint.parser, parserOptions: { projectService: false } },
+    rules: {},
+  },
+  {
+    files: ['**/*.{js,ts,mjs,cjs,mts,cts}'],
+    ignores: ['eslint.config.mts'],
     languageOptions: { parserOptions: { projectService: true } },
   },
   {

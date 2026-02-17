@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { env } from './lib/env.lib';
+import { env } from './lib/env.lib.js';
 
 const baseURL = env.BASE_URL;
 

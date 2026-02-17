@@ -6,29 +6,30 @@ import { execa } from 'execa';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { spinner } from '@clack/prompts';
+import type { ProjectConfig, PackageJSON } from './types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const waitPromise = async (ms) => new Promise((res) => setTimeout(() => res(null), ms));
+const waitPromise = async (ms: number): Promise<null> =>
+  new Promise((res) => setTimeout(() => res(null), ms));
 
-function createNvmConfig(targetDir) {
+function createNvmConfig(targetDir: string): void {
   try {
     const nodeVersion = execSync('node -v', { encoding: 'utf8' }).trim();
     const version = nodeVersion.startsWith('v') ? nodeVersion.slice(1) : nodeVersion;
     fs.writeFileSync(`${targetDir}/.nvmrc`, version + '\n', 'utf8');
   } catch (err) {
-    console.error('Error writing .nvmrc:', err.message);
+    console.error('Error writing .nvmrc:', (err as Error).message);
     process.exit(1);
   }
 }
 
-export async function installDeps(dependancies, targetDir) {
+export async function installDeps(dependancies: string[], targetDir: string): Promise<void> {
   const sanitizedUrl = targetDir.replace(/\/$/, '');
   const segments = sanitizedUrl.split('/');
   const project = segments[segments.length - 1];
 
-  // Creating package first
-  const pkg = {
+  const pkg: PackageJSON = {
     name: project,
     version: '1.0.0',
     type: 'module',
@@ -42,46 +43,42 @@ export async function installDeps(dependancies, targetDir) {
 
   writeFileSync(`${targetDir}/package.json`, JSON.stringify(pkg, null, 2));
 
-  // Deps
   const sp = spinner();
   sp.start('Installing dependencies...');
   await execa('npm', ['install', ...dependancies, '--save-dev'], { cwd: targetDir });
-  await waitPromise(1500); // Loading too quick feels wrong psychologically.
-  sp.stop('Dependanices installed');
+  await waitPromise(1500);
+  sp.stop('Dependencies installed');
 
-  // Browser
   sp.start('Installing Playwright browsers...');
-  await execa('npx', ['playwright', 'install'], {
-    cwd: targetDir,
-  });
-  await waitPromise(1500); // Loading too quick feels wrong psychologically.
+  await execa('npx', ['playwright', 'install'], { cwd: targetDir });
+  await waitPromise(1500);
   sp.stop('Setup complete!');
 }
 
-export async function generateProject(config) {
+export async function generateProject(config: ProjectConfig): Promise<void> {
   const language = config.language.toLowerCase();
   const model = config.model.split(' ')[0].toLowerCase();
   const tools = config.tools;
   const projectName = config.projectName;
   const eslintConfig = config.eslintConfig ?? 'basic';
 
-  const dependancies = [];
+  const dependancies: string[] = [];
   const targetDir = path.resolve(process.cwd(), projectName);
 
   const commonDir = path.resolve(__dirname, `../templates/common`);
   if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + commonDir);
 
   const baseLanguageDir = path.resolve(__dirname, `../templates/${language}`);
-  if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + baseLanguageDir);
+  if (!existsSync(baseLanguageDir)) throw new Error('Could not find template folder for, ' + baseLanguageDir);
 
   const modelDir = path.resolve(__dirname, `../templates/models/${model}/${language}`);
-  if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + modelDir);
+  if (!existsSync(modelDir)) throw new Error('Could not find template folder for, ' + modelDir);
 
   const prettierDir = path.resolve(__dirname, `../templates/prettier/${language}`);
-  if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + prettierDir);
+  if (!existsSync(prettierDir)) throw new Error('Could not find template folder for, ' + prettierDir);
 
   const eslintDir = path.resolve(__dirname, `../templates/eslint/${language}/${eslintConfig}`);
-  if (!existsSync(commonDir)) throw new Error('Could not find template folder for, ' + eslintDir);
+  if (!existsSync(eslintDir)) throw new Error('Could not find template folder for, ' + eslintDir);
 
   p.log.info(`Creating project at ${chalk.blue.underline(targetDir)}`);
 
@@ -92,7 +89,6 @@ export async function generateProject(config) {
   fs.cpSync(baseLanguageDir, targetDir, { recursive: true, errorOnExist: true });
   fs.cpSync(modelDir, targetDir, { recursive: true, errorOnExist: true });
 
-  // Optional tools
   if (tools.includes('eslint')) {
     fs.cpSync(eslintDir, targetDir, { recursive: true, errorOnExist: true });
   }
@@ -109,15 +105,12 @@ export async function generateProject(config) {
   const jsEslintDeps = [...baseEslintDeps];
   const tsEslintDeps = [...baseEslintDeps, 'typescript-eslint', 'globals', 'jiti'];
 
-  // Start with base dependencies
   dependancies.push(...baseDeps);
 
-  // Add TypeScript-specific dependencies
   if (language === 'typescript') {
     dependancies.push(...tsDeps);
   }
 
-  // Add ESLint dependencies based on language
   if (tools.includes('eslint')) {
     if (language === 'typescript') {
       dependancies.push(...tsEslintDeps);
@@ -126,7 +119,6 @@ export async function generateProject(config) {
     }
   }
 
-  // Add Prettier if requested
   if (tools.includes('prettier')) {
     dependancies.push(...prettierDeps);
   }
