@@ -1,0 +1,6 @@
+{
+  "js/ts.implicitProjectConfig.checkJs": false,
+  "search.exclude": {
+    "dist": true
+  }
+}

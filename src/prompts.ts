@@ -6,7 +6,7 @@ import type { ProjectConfig } from './types.js';
 const withComment = (item: string, hint: string): string =>
   item + chalk.grey(` (${hint})`);
 
-function quitEarlyOnCancelled(value: unknown): void {
+function quitEarlyOnCancelled<T>(value: T | symbol): asserts value is T {
   if (p.isCancel(value)) {
     p.cancel('Operation cancelled.');
     process.exit(0);
@@ -87,7 +87,7 @@ export async function promptUser(): Promise<ProjectConfig> {
     });
     quitEarlyOnCancelled(tools);
 
-    if ((tools as string[]).length === 0) {
+    if (tools.length === 0) {
       codeQualityUnsure = true;
       const confirmed = await p.confirm({
         message:
@@ -104,7 +104,7 @@ export async function promptUser(): Promise<ProjectConfig> {
       return [];
     }
 
-    return tools as string[];
+    return tools;
   }
   const tools = await askTools();
 

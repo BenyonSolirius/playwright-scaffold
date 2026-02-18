@@ -5,12 +5,8 @@ import { execSync } from 'node:child_process';
 import { execa } from 'execa';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
-import { spinner } from '@clack/prompts';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const waitPromise = async (/** @type {number | undefined} */ ms) => new Promise((res) => setTimeout(() => res(null), ms));
-/**
- * @param {string} targetDir
- */
+const waitPromise = async (ms) => new Promise((res) => setTimeout(() => res(null), ms));
 function createNvmConfig(targetDir) {
     try {
         const nodeVersion = execSync('node -v', { encoding: 'utf8' }).trim();
@@ -18,16 +14,11 @@ function createNvmConfig(targetDir) {
         fs.writeFileSync(`${targetDir}/.nvmrc`, version + '\n', 'utf8');
     }
     catch (err) {
-        // @ts-ignore
         console.error('Error writing .nvmrc:', err.message);
         process.exit(1);
     }
 }
-/**
- * @param {string[]} dependancies
- * @param {string} targetDir
- */
-export async function installDeps(dependancies, targetDir) {
+export async function installDeps(dependencies, targetDir, tools = []) {
     const sanitizedUrl = targetDir.replace(/\/$/, '');
     const segments = sanitizedUrl.split('/');
     const project = segments[segments.length - 1];
@@ -38,14 +29,14 @@ export async function installDeps(dependancies, targetDir) {
         scripts: {
             test: 'playwright test',
             'test:ui': 'playwright test --ui',
-            lint: 'eslint',
-            format: 'prettier . --write --log-level=silent',
+            ...(tools.includes('eslint') && { lint: 'eslint' }),
+            ...(tools.includes('prettier') && { format: 'prettier . --write --log-level=silent' }),
         },
     };
     writeFileSync(`${targetDir}/package.json`, JSON.stringify(pkg, null, 2));
-    const sp = spinner();
+    const sp = p.spinner();
     sp.start('Installing dependencies...');
-    await execa('npm', ['install', ...dependancies, '--save-dev'], { cwd: targetDir });
+    await execa('npm', ['install', ...dependencies, '--save-dev'], { cwd: targetDir });
     await waitPromise(1500);
     sp.stop('Dependencies installed');
     sp.start('Installing Playwright browsers...');
@@ -53,16 +44,13 @@ export async function installDeps(dependancies, targetDir) {
     await waitPromise(1500);
     sp.stop('Setup complete!');
 }
-/**
- * @param {{ language: string; model: string; tools: any; projectName: any; eslintConfig: string; }} config
- */
 export async function generateProject(config) {
     const language = config.language.toLowerCase();
     const model = config.model.split(' ')[0].toLowerCase();
     const tools = config.tools;
     const projectName = config.projectName;
     const eslintConfig = config.eslintConfig ?? 'basic';
-    const dependancies = [];
+    const dependencies = [];
     const targetDir = path.resolve(process.cwd(), projectName);
     const commonDir = path.resolve(__dirname, `../templates/common`);
     if (!existsSync(commonDir))
@@ -83,13 +71,13 @@ export async function generateProject(config) {
     fs.cpSync(commonDir, targetDir, { recursive: true, errorOnExist: true });
     fs.renameSync(path.join(targetDir, 'gitignore'), path.join(targetDir, '.gitignore'));
     fs.renameSync(path.join(targetDir, 'env.local'), path.join(targetDir, '.env.local'));
-    fs.cpSync(baseLanguageDir, targetDir, { recursive: true, errorOnExist: true });
-    fs.cpSync(modelDir, targetDir, { recursive: true, errorOnExist: true });
+    fs.cpSync(baseLanguageDir, targetDir, { recursive: true });
+    fs.cpSync(modelDir, targetDir, { recursive: true });
     if (tools.includes('eslint')) {
-        fs.cpSync(eslintDir, targetDir, { recursive: true, errorOnExist: true });
+        fs.cpSync(eslintDir, targetDir, { recursive: true });
     }
     if (tools.includes('prettier')) {
-        fs.cpSync(prettierDir, targetDir, { recursive: true, errorOnExist: true });
+        fs.cpSync(prettierDir, targetDir, { recursive: true });
     }
     createNvmConfig(targetDir);
     const baseDeps = ['@playwright/test', 'dotenv', 'zod'];
@@ -98,21 +86,21 @@ export async function generateProject(config) {
     const baseEslintDeps = ['eslint', '@eslint/js', 'eslint-plugin-playwright'];
     const jsEslintDeps = [...baseEslintDeps];
     const tsEslintDeps = [...baseEslintDeps, 'typescript-eslint', 'globals', 'jiti'];
-    dependancies.push(...baseDeps);
+    dependencies.push(...baseDeps);
     if (language === 'typescript') {
-        dependancies.push(...tsDeps);
+        dependencies.push(...tsDeps);
     }
     if (tools.includes('eslint')) {
         if (language === 'typescript') {
-            dependancies.push(...tsEslintDeps);
+            dependencies.push(...tsEslintDeps);
         }
         else if (language === 'javascript') {
-            dependancies.push(...jsEslintDeps);
+            dependencies.push(...jsEslintDeps);
         }
     }
     if (tools.includes('prettier')) {
-        dependancies.push(...prettierDeps);
+        dependencies.push(...prettierDeps);
     }
-    await installDeps(dependancies, targetDir);
+    await installDeps(dependencies, targetDir, tools);
 }
 //# sourceMappingURL=generator.js.map

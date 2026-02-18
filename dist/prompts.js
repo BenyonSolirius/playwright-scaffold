@@ -1,10 +1,7 @@
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import pkg from '../package.json' with { type: 'json' };
-const withComment = (/** @type {string} */ item, /** @type {string} */ hint) => item + chalk.grey(` (${hint})`);
-/**
- * @param {unknown} value
- */
+const withComment = (item, hint) => item + chalk.grey(` (${hint})`);
 function quitEarlyOnCancelled(value) {
     if (p.isCancel(value)) {
         p.cancel('Operation cancelled.');
@@ -78,7 +75,6 @@ export async function promptUser() {
             required: false,
         });
         quitEarlyOnCancelled(tools);
-        // @ts-ignore
         if (tools.length === 0) {
             codeQualityUnsure = true;
             const confirmed = await p.confirm({
@@ -97,9 +93,7 @@ export async function promptUser() {
     }
     const tools = await askTools();
     let eslintConfig = 'solirius';
-    // @ts-ignore
     if (!codeQualityUnsure && tools.includes('eslint')) {
-        // @ts-ignore
         eslintConfig = (await p.select({
             message: 'Which ESLint rule configuration would you like to use?',
             options: [

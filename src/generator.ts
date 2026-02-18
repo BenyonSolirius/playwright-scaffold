@@ -5,7 +5,6 @@ import { execSync } from 'node:child_process';
 import { execa } from 'execa';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
-import { spinner } from '@clack/prompts';
 import type { ProjectConfig, PackageJSON } from './types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,7 +23,7 @@ function createNvmConfig(targetDir: string): void {
   }
 }
 
-export async function installDeps(dependancies: string[], targetDir: string): Promise<void> {
+export async function installDeps(dependencies: string[], targetDir: string, tools: string[] = []): Promise<void> {
   const sanitizedUrl = targetDir.replace(/\/$/, '');
   const segments = sanitizedUrl.split('/');
   const project = segments[segments.length - 1];
@@ -36,16 +35,16 @@ export async function installDeps(dependancies: string[], targetDir: string): Pr
     scripts: {
       test: 'playwright test',
       'test:ui': 'playwright test --ui',
-      lint: 'eslint',
-      format: 'prettier . --write --log-level=silent',
+      ...(tools.includes('eslint') && { lint: 'eslint' }),
+      ...(tools.includes('prettier') && { format: 'prettier . --write --log-level=silent' }),
     },
   };
 
   writeFileSync(`${targetDir}/package.json`, JSON.stringify(pkg, null, 2));
 
-  const sp = spinner();
+  const sp = p.spinner();
   sp.start('Installing dependencies...');
-  await execa('npm', ['install', ...dependancies, '--save-dev'], { cwd: targetDir });
+  await execa('npm', ['install', ...dependencies, '--save-dev'], { cwd: targetDir });
   await waitPromise(1500);
   sp.stop('Dependencies installed');
 
@@ -62,7 +61,7 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
   const projectName = config.projectName;
   const eslintConfig = config.eslintConfig ?? 'basic';
 
-  const dependancies: string[] = [];
+  const dependencies: string[] = [];
   const targetDir = path.resolve(process.cwd(), projectName);
 
   const commonDir = path.resolve(__dirname, `../templates/common`);
@@ -86,14 +85,14 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
   fs.renameSync(path.join(targetDir, 'gitignore'), path.join(targetDir, '.gitignore'));
   fs.renameSync(path.join(targetDir, 'env.local'), path.join(targetDir, '.env.local'));
 
-  fs.cpSync(baseLanguageDir, targetDir, { recursive: true, errorOnExist: true });
-  fs.cpSync(modelDir, targetDir, { recursive: true, errorOnExist: true });
+  fs.cpSync(baseLanguageDir, targetDir, { recursive: true });
+  fs.cpSync(modelDir, targetDir, { recursive: true });
 
   if (tools.includes('eslint')) {
-    fs.cpSync(eslintDir, targetDir, { recursive: true, errorOnExist: true });
+    fs.cpSync(eslintDir, targetDir, { recursive: true });
   }
   if (tools.includes('prettier')) {
-    fs.cpSync(prettierDir, targetDir, { recursive: true, errorOnExist: true });
+    fs.cpSync(prettierDir, targetDir, { recursive: true });
   }
 
   createNvmConfig(targetDir);
@@ -105,23 +104,23 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
   const jsEslintDeps = [...baseEslintDeps];
   const tsEslintDeps = [...baseEslintDeps, 'typescript-eslint', 'globals', 'jiti'];
 
-  dependancies.push(...baseDeps);
+  dependencies.push(...baseDeps);
 
   if (language === 'typescript') {
-    dependancies.push(...tsDeps);
+    dependencies.push(...tsDeps);
   }
 
   if (tools.includes('eslint')) {
     if (language === 'typescript') {
-      dependancies.push(...tsEslintDeps);
+      dependencies.push(...tsEslintDeps);
     } else if (language === 'javascript') {
-      dependancies.push(...jsEslintDeps);
+      dependencies.push(...jsEslintDeps);
     }
   }
 
   if (tools.includes('prettier')) {
-    dependancies.push(...prettierDeps);
+    dependencies.push(...prettierDeps);
   }
 
-  await installDeps(dependancies, targetDir);
+  await installDeps(dependencies, targetDir, tools);
 }
