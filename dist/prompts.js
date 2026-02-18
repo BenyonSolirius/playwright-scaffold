@@ -8,6 +8,7 @@ function quitEarlyOnCancelled(value) {
         process.exit(0);
     }
 }
+   // Must me alphanumeric, less than 50 characters, a minimum of 1.
 export async function promptUser() {
     console.clear();
     p.intro(pkg.name);
@@ -21,6 +22,7 @@ export async function promptUser() {
                 return 'Invalid directory name, must be alphanumeric.';
         },
     });
+      // Ask for confirmation if asked to use JavaScript
     quitEarlyOnCancelled(projectName);
     async function askLanguage() {
         const language = await p.select({
@@ -30,6 +32,7 @@ export async function promptUser() {
                 { value: 'javascript', label: 'JavaScript' },
             ],
         });
+        // TODO: Possibly make it add a MD file explaining the benefits to prettier/eslint
         quitEarlyOnCancelled(language);
         if (language !== 'typescript') {
             const confirmed = await p.confirm({
@@ -59,10 +62,13 @@ export async function promptUser() {
             {
                 value: 'spm',
                 label: withComment('Screenplay Model', 'not implemented'),
+                hint: 'recommended only for experienced users, advanced pattern with higher complexity',
                 disabled: true,
             },
+
         ],
     });
+    // This question is skipped and the recommended is chosen if the previous tried to avoid eslint.
     quitEarlyOnCancelled(model);
     let codeQualityUnsure = false;
     async function askTools() {
@@ -91,6 +97,7 @@ export async function promptUser() {
         }
         return tools;
     }
+      // Don't ask if the user is unsure, just use the recommened option. Needs Hints
     const tools = await askTools();
     let eslintConfig = 'solirius';
     if (!codeQualityUnsure && tools.includes('eslint')) {
