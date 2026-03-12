@@ -15,13 +15,12 @@
   },
   "files": [
     "bin",
-    "src",
-    "templates/**/*",
-    "templates/common/",
-    "templates/common/.env.local",
-    "templates/common/.gitignore"
+    "dist",
+    "templates"
   ],
   "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
     "format": "prettier . --write --log-level=silent"
   },
   "dependencies": {
@@ -38,12 +37,15 @@
     "typescript-eslint": "^8.54.0",
     "zod": "^4.3.6"
   },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "typescript": "^5.9.3"
+  },
   "engines": {
     "node": ">=18"
   },
   "author": "Jordan Benyon",
   "license": "MIT",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BenyonSolirius/playwright-scaffold.git"

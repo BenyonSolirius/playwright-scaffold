@@ -1,6 +1,6 @@
 import { execa } from 'execa';
 
-export async function isCodeCmdAvailable() {
+export async function isCodeCmdAvailable(): Promise<boolean> {
   try {
     const { code } = await execa('code', ['--version']);
     return code === 0; // command exists and is available

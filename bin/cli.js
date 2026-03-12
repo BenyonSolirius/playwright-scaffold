@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { promptUser } from '../src/prompts.js';
-import { generateProject } from '../src/generator.js';
+import { promptUser } from '../dist/prompts.js';
+import { generateProject } from '../dist/generator.js';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
-import { isCodeCmdAvailable } from '../src/utils.js';
+import { isCodeCmdAvailable } from '../dist/utils.js';
 
 (async () => {
   const config = await promptUser();

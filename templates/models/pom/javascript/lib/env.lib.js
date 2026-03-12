@@ -1,7 +1,10 @@
 /* eslint-disable no-restricted-properties */
 import * as dotenv from 'dotenv';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // --------------------
 // Environment File Setup

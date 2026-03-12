@@ -1,7 +1,6 @@
 import * as eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import { defineConfig } from 'eslint/config';
-
 // Temporary ESLint configuration with strict rules and common pitfalls checks.
 // Ideally, the team should agree on a shared rule set for consistency.
 // While no rule set is perfect, aligning the team and enforcing guardrails
@@ -18,6 +17,6 @@ export default defineConfig([
     ignores: ['**/*.mjs'],
   },
   {
-    languageOptions: { parserOptions: { projectService: true } },
+    languageOptions: { parserOptions: { projectService: { allowDefaultProject: ['eslint.config.mts', '*.config.mts'] } } },
   },
 ]);
