@@ -23,7 +23,33 @@ function createNvmConfig(targetDir: string): void {
   }
 }
 
-export async function installDeps(dependencies: string[], targetDir: string, tools: string[] = []): Promise<void> {
+function createTsConfig(targetDir: string): void {
+  const tsConfig = {
+    compilerOptions: {
+      target: 'ES2020',
+      module: 'ESNext',
+      moduleResolution: 'bundler',
+      lib: ['ES2020'],
+      types: ['node'],
+      resolveJsonModule: true,
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+      strict: true,
+      skipLibCheck: true,
+      forceConsistentCasingInFileNames: true,
+    },
+    include: ['**/*.ts'],
+    exclude: ['node_modules'],
+  };
+
+  writeFileSync(`${targetDir}/tsconfig.json`, JSON.stringify(tsConfig, null, 2) + '\n');
+}
+
+export async function installDeps(
+  dependencies: string[],
+  targetDir: string,
+  tools: string[] = []
+): Promise<void> {
   const sanitizedUrl = targetDir.replace(/\/$/, '');
   const segments = sanitizedUrl.split('/');
   const project = segments[segments.length - 1];
@@ -98,7 +124,7 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
   createNvmConfig(targetDir);
 
   const baseDeps = ['@playwright/test', 'dotenv', 'zod'];
-  const tsDeps = ['@types/node'];
+  const tsDeps = ['typescript', '@types/node'];
   const prettierDeps = ['prettier'];
   const baseEslintDeps = ['eslint', '@eslint/js', 'eslint-plugin-playwright'];
   const jsEslintDeps = [...baseEslintDeps];
@@ -107,6 +133,7 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
   dependencies.push(...baseDeps);
 
   if (language === 'typescript') {
+    createTsConfig(targetDir);
     dependencies.push(...tsDeps);
   }
 
